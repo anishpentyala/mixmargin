@@ -1,0 +1,515 @@
+{
+  "a_always_above_margin": false,
+  "at_margin": {
+    "a_rate": {
+      "denominator": "30",
+      "numerator": "19"
+    },
+    "b_rate": {
+      "denominator": "30",
+      "numerator": "19"
+    },
+    "difference": {
+      "denominator": "1",
+      "numerator": "0"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "3",
+        "numerator": "1"
+      },
+      "routine": {
+        "denominator": "3",
+        "numerator": "2"
+      }
+    }
+  },
+  "format": "mixmargin/v1",
+  "group_count": 2,
+  "groups": [
+    {
+      "a_success": 1,
+      "b_success": 3,
+      "difference": {
+        "denominator": "5",
+        "numerator": "-1"
+      },
+      "group": "hard",
+      "total": 10,
+      "weight_max": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "weight_min": {
+        "denominator": "5",
+        "numerator": "1"
+      }
+    },
+    {
+      "a_success": 90,
+      "b_success": 80,
+      "difference": {
+        "denominator": "10",
+        "numerator": "1"
+      },
+      "group": "routine",
+      "total": 100,
+      "weight_max": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "weight_min": {
+        "denominator": "5",
+        "numerator": "1"
+      }
+    }
+  ],
+  "input": {
+    "bytes": 100,
+    "sha256": "3cee0eb394d352b3727313e3e41bfc5acbfaf679628ec4ccbfd2f983dc9d8494"
+  },
+  "margin": {
+    "denominator": "1",
+    "numerator": "0"
+  },
+  "maximum": {
+    "a_rate": {
+      "denominator": "50",
+      "numerator": "37"
+    },
+    "b_rate": {
+      "denominator": "10",
+      "numerator": "7"
+    },
+    "difference": {
+      "denominator": "25",
+      "numerator": "1"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "5",
+        "numerator": "1"
+      },
+      "routine": {
+        "denominator": "5",
+        "numerator": "4"
+      }
+    }
+  },
+  "minimum": {
+    "a_rate": {
+      "denominator": "50",
+      "numerator": "13"
+    },
+    "b_rate": {
+      "denominator": "5",
+      "numerator": "2"
+    },
+    "difference": {
+      "denominator": "50",
+      "numerator": "-7"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "routine": {
+        "denominator": "5",
+        "numerator": "1"
+      }
+    }
+  },
+  "observed": {
+    "a_rate": {
+      "denominator": "110",
+      "numerator": "91"
+    },
+    "b_rate": {
+      "denominator": "110",
+      "numerator": "83"
+    },
+    "difference": {
+      "denominator": "55",
+      "numerator": "4"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "11",
+        "numerator": "1"
+      },
+      "routine": {
+        "denominator": "11",
+        "numerator": "10"
+      }
+    },
+    "within_weight_bounds": false
+  },
+  "observed_sensitivity": {
+    "distance": null,
+    "status": "observed_outside_bounds",
+    "witness": null
+  },
+  "possible": {
+    "above_margin": true,
+    "below_margin": true,
+    "equal_margin": true
+  },
+  "reference_analysis": {
+    "reference": {
+      "a_rate": {
+        "denominator": "50",
+        "numerator": "33"
+      },
+      "b_rate": {
+        "denominator": "20",
+        "numerator": "13"
+      },
+      "difference": {
+        "denominator": "100",
+        "numerator": "1"
+      },
+      "weights": {
+        "hard": {
+          "denominator": "10",
+          "numerator": "3"
+        },
+        "routine": {
+          "denominator": "10",
+          "numerator": "7"
+        }
+      }
+    },
+    "scope": "declared reference group mixture, not the evaluation sample mix",
+    "sensitivity": {
+      "distance": {
+        "denominator": "30",
+        "numerator": "1"
+      },
+      "status": "attainable",
+      "witness": {
+        "a_rate": {
+          "denominator": "30",
+          "numerator": "19"
+        },
+        "b_rate": {
+          "denominator": "30",
+          "numerator": "19"
+        },
+        "difference": {
+          "denominator": "1",
+          "numerator": "0"
+        },
+        "weights": {
+          "hard": {
+            "denominator": "3",
+            "numerator": "1"
+          },
+          "routine": {
+            "denominator": "3",
+            "numerator": "2"
+          }
+        }
+      }
+    },
+    "tv_budget": {
+      "a_always_above_margin": true,
+      "at_margin": null,
+      "budget": {
+        "denominator": "100",
+        "numerator": "1"
+      },
+      "maximum": {
+        "a_rate": {
+          "denominator": "250",
+          "numerator": "167"
+        },
+        "b_rate": {
+          "denominator": "200",
+          "numerator": "131"
+        },
+        "difference": {
+          "denominator": "1000",
+          "numerator": "13"
+        },
+        "distance_used": {
+          "denominator": "100",
+          "numerator": "1"
+        },
+        "weights": {
+          "hard": {
+            "denominator": "100",
+            "numerator": "29"
+          },
+          "routine": {
+            "denominator": "100",
+            "numerator": "71"
+          }
+        }
+      },
+      "minimum": {
+        "a_rate": {
+          "denominator": "250",
+          "numerator": "163"
+        },
+        "b_rate": {
+          "denominator": "200",
+          "numerator": "129"
+        },
+        "difference": {
+          "denominator": "1000",
+          "numerator": "7"
+        },
+        "distance_used": {
+          "denominator": "100",
+          "numerator": "1"
+        },
+        "weights": {
+          "hard": {
+            "denominator": "100",
+            "numerator": "31"
+          },
+          "routine": {
+            "denominator": "100",
+            "numerator": "69"
+          }
+        }
+      },
+      "possible": {
+        "above_margin": true,
+        "below_margin": false,
+        "equal_margin": false
+      },
+      "status": "complete"
+    },
+    "tv_frontier": {
+      "maximum": [
+        {
+          "budget": {
+            "denominator": "1",
+            "numerator": "0"
+          },
+          "witness": {
+            "a_rate": {
+              "denominator": "50",
+              "numerator": "33"
+            },
+            "b_rate": {
+              "denominator": "20",
+              "numerator": "13"
+            },
+            "difference": {
+              "denominator": "100",
+              "numerator": "1"
+            },
+            "distance_used": {
+              "denominator": "1",
+              "numerator": "0"
+            },
+            "weights": {
+              "hard": {
+                "denominator": "10",
+                "numerator": "3"
+              },
+              "routine": {
+                "denominator": "10",
+                "numerator": "7"
+              }
+            }
+          }
+        },
+        {
+          "budget": {
+            "denominator": "10",
+            "numerator": "1"
+          },
+          "witness": {
+            "a_rate": {
+              "denominator": "50",
+              "numerator": "37"
+            },
+            "b_rate": {
+              "denominator": "10",
+              "numerator": "7"
+            },
+            "difference": {
+              "denominator": "25",
+              "numerator": "1"
+            },
+            "distance_used": {
+              "denominator": "10",
+              "numerator": "1"
+            },
+            "weights": {
+              "hard": {
+                "denominator": "5",
+                "numerator": "1"
+              },
+              "routine": {
+                "denominator": "5",
+                "numerator": "4"
+              }
+            }
+          }
+        },
+        {
+          "budget": {
+            "denominator": "1",
+            "numerator": "1"
+          },
+          "witness": {
+            "a_rate": {
+              "denominator": "50",
+              "numerator": "37"
+            },
+            "b_rate": {
+              "denominator": "10",
+              "numerator": "7"
+            },
+            "difference": {
+              "denominator": "25",
+              "numerator": "1"
+            },
+            "distance_used": {
+              "denominator": "10",
+              "numerator": "1"
+            },
+            "weights": {
+              "hard": {
+                "denominator": "5",
+                "numerator": "1"
+              },
+              "routine": {
+                "denominator": "5",
+                "numerator": "4"
+              }
+            }
+          }
+        }
+      ],
+      "minimum": [
+        {
+          "budget": {
+            "denominator": "1",
+            "numerator": "0"
+          },
+          "witness": {
+            "a_rate": {
+              "denominator": "50",
+              "numerator": "33"
+            },
+            "b_rate": {
+              "denominator": "20",
+              "numerator": "13"
+            },
+            "difference": {
+              "denominator": "100",
+              "numerator": "1"
+            },
+            "distance_used": {
+              "denominator": "1",
+              "numerator": "0"
+            },
+            "weights": {
+              "hard": {
+                "denominator": "10",
+                "numerator": "3"
+              },
+              "routine": {
+                "denominator": "10",
+                "numerator": "7"
+              }
+            }
+          }
+        },
+        {
+          "budget": {
+            "denominator": "2",
+            "numerator": "1"
+          },
+          "witness": {
+            "a_rate": {
+              "denominator": "50",
+              "numerator": "13"
+            },
+            "b_rate": {
+              "denominator": "5",
+              "numerator": "2"
+            },
+            "difference": {
+              "denominator": "50",
+              "numerator": "-7"
+            },
+            "distance_used": {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            "weights": {
+              "hard": {
+                "denominator": "5",
+                "numerator": "4"
+              },
+              "routine": {
+                "denominator": "5",
+                "numerator": "1"
+              }
+            }
+          }
+        },
+        {
+          "budget": {
+            "denominator": "1",
+            "numerator": "1"
+          },
+          "witness": {
+            "a_rate": {
+              "denominator": "50",
+              "numerator": "13"
+            },
+            "b_rate": {
+              "denominator": "5",
+              "numerator": "2"
+            },
+            "difference": {
+              "denominator": "50",
+              "numerator": "-7"
+            },
+            "distance_used": {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            "weights": {
+              "hard": {
+                "denominator": "5",
+                "numerator": "4"
+              },
+              "routine": {
+                "denominator": "5",
+                "numerator": "1"
+              }
+            }
+          }
+        }
+      ],
+      "status": "complete"
+    }
+  },
+  "scope": "fixed empirical conditional rates under shared bounded group weights only",
+  "tv_budget": {
+    "a_always_above_margin": null,
+    "at_margin": null,
+    "budget": {
+      "denominator": "100",
+      "numerator": "1"
+    },
+    "maximum": null,
+    "minimum": null,
+    "possible": null,
+    "status": "observed_outside_bounds"
+  },
+  "tv_frontier": {
+    "maximum": null,
+    "minimum": null,
+    "status": "observed_outside_bounds"
+  }
+}
