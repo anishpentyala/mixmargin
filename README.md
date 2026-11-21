@@ -87,6 +87,53 @@ individual examples, model predictions, or full deployment distributions. It
 is not a probability of failure, a confidence level, or an estimate of how
 likely a deployment shift is. Conditional empirical rates remain fixed.
 
+## What can happen within a fixed shift budget?
+
+Use `--tv-budget 0.1`, or `analyze(..., tv_budget='0.1')` /
+`audit(..., tv_budget='0.1')`, to add an exact attainable range for mixtures
+within that total-variation distance of the observed group proportions.
+The declared box bounds still apply. The budget has the same exact decimal
+syntax and range `[0,1]` as `--margin`. It is a user assumption, not an
+estimated confidence level.
+
+```sh
+mixmargin examples/budget.csv --tv-budget 0.1
+# exit 1 describes all allowed mixtures, even when the budgeted guarantee is true
+```
+
+The example has two equally sized groups with conditional differences 1 and
+-1/2, unrestricted box bounds, and observed difference 1/4. Within TV budget
+1/10, the exact attainable difference ranges from 1/10 to 2/5. A is strictly
+better everywhere in this smaller set. Across all box-allowed mixtures, it
+is not. `examples/budget.json` is the full opt-in report.
+
+The optional `tv_budget` field contains:
+
+- `status`: `complete` when the observed mix satisfies the declared bounds.
+- `budget`: the supplied exact rational limit.
+- `minimum`, `maximum`: attainable witnesses, each with `distance_used`.
+- `at_margin`: an attainable equality witness with `distance_used`, or `null`.
+- `possible` and `a_always_above_margin`: decisions for this restricted set only.
+
+At budget zero, both endpoints equal the observed difference. Budget one
+recovers the global endpoint values. A witness may use less than the budget
+when a box face or a constant objective prevents further improvement; it
+need not be the unique extremizer or the nearest one among all extremizers.
+The budgeted equality witness is an interpolation of these endpoints, not
+necessarily the nearest margin witness reported by `observed_sensitivity`.
+
+If the observed mix is outside the declared bounds, `status` is
+`observed_outside_bounds`; the budget is retained but both endpoints, the
+equality witness, and both verdict fields are `null`. No projection is
+performed, even at budget one. This is intentionally unavailable rather
+than an optimization around an invalid reference mix.
+
+**CLI exit status and all top-level extrema/verdicts still describe all
+box-allowed mixtures.** Consumers of the smaller-set guarantee must check
+`tv_budget.status == 'complete'` and then its nested verdict. Omitting the
+option (or passing `None` in Python) omits the new field entirely and leaves
+the existing report unchanged.
+
 ## Margin and exit status
 
 ```sh
@@ -117,6 +164,7 @@ The report includes:
 - `possible` and `a_always_above_margin`: exact strict/equality decisions.
 - `observed`: rates and weights based on observed group totals, plus `within_weight_bounds`.
 - `observed_sensitivity`: minimum total-variation distance from the allowed observed mix to loss of the strict margin, with status and an attaining witness.
+- `tv_budget`: included only when requested; restricted-set endpoints, witnesses and verdicts as described above.
 - `groups`: the validated aggregate counts, bounds, and within-group differences.
 - `input`: byte count and SHA-256 of the bytes actually read. Only the file-reading API adds this field. No path is echoed.
 
@@ -162,6 +210,19 @@ margin cannot be nearer: its segment from the observed mix crosses equality
 first, within the same convex bounds. As with the extrema, this is a standard
 bounded linear optimization argument, not an algorithmic novelty claim.
 
+### Why the budgeted range is sharp
+
+Use the same capacity-ordered exchange argument as the distance calculation,
+but stop when the supplied budget is exhausted or no strict objective gain
+remains. For the maximum, reverse all scores. Starting at an allowed
+observed mix, every improving transfer respects the box bounds and the
+simplex. Donors and recipients have disjoint strict score ranges, so no
+group reverses direction and total moved mass equals total variation.
+No alternative donor/recipient pairing can improve more with the same
+mass. Thus both endpoints are attained within the budget and are optimal.
+Their segment stays inside the convex box/simplex/TV intersection, so the
+interpolated equality witness is feasible too.
+
 ## Scope and privacy
 
 Use disjoint groups that cover the intended population and the same labeled evaluation examples for both models. Overlapping cohorts do not define a partition, so their weights cannot be treated this way. Unknown/new groups, within-group distribution changes, changes in label correctness, and uncertainty in the conditional rates are outside this model. Small samples can give exact but unreliable empirical rates. Accuracy is not necessarily the metric your application needs.
@@ -177,7 +238,10 @@ There is no telemetry or network code. Reports disclose **all labels and aggrega
 - [scikit-learn accuracy_score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html) supports weighted accuracy. mixmargin takes aggregate counts and searches a particular constrained weight set instead of scoring supplied predictions and weights.
 - [Sabato and Yom-Tov, ICML 2020](https://proceedings.mlr.press/v119/sabato20a.html) studies bounds on classifier fairness and accuracy from population statistics. Its unknowns and fairness objective differ from the fixed conditional-rate, shared-mixture objective here. This tool does not implement that paper.
 
-The box-simplex greedy optimization is standard linear optimization. The original contribution here is a small offline artifact with a strict count/weight contract, exact witnesses, stable JSON, and bounded parsing, not an algorithmic novelty claim.
+- [Total variation distance](https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures) gives the finite-distribution half-L1 convention used here.
+- [Farokhi, 2023](https://arxiv.org/abs/2302.07454) studies distributionally robust optimization involving total-variation uncertainty and noisy data. mixmargin uses a much narrower fixed empirical conditional-rate model with declared group-weight bounds; it does not implement that paper's noise model or statistical guarantees.
+
+The box-simplex and TV-budget greedy optimization is standard linear optimization. The original contribution here is a small offline artifact with a strict count/weight contract, exact witnesses, stable JSON, and bounded parsing, not an algorithmic novelty claim.
 
 ## Development
 
@@ -186,6 +250,6 @@ python -m unittest -v
 python -m pip wheel . --no-deps -w dist
 ```
 
-The tests include an independent exact vertex enumerator for up to six groups, deterministic randomized feasible and infeasible inputs, witness attainment, swapping/scaling/permutation checks, parser and resource-limit cases, CLI statuses, and output-device failures. The observed-distance tests also use an independent exact oracle that enumerates vertices of each L1 sign region intersected with the margin plane, for up to five groups. There is no claim that these tests prove all possible inputs correct.
+The tests include an independent exact vertex enumerator for up to six groups, deterministic randomized feasible and infeasible inputs, witness attainment, swapping/scaling/permutation checks, parser and resource-limit cases, CLI statuses, and output-device failures. The observed-distance tests also use an independent exact oracle that enumerates vertices of each L1 sign region intersected with the margin plane, for up to five groups. The opt-in budget tests independently enumerate vertices of the box/simplex/TV intersection, including its active TV boundary, for up to five groups; they also cover 64 groups and exact tiny budgets. There is no claim that these tests prove all possible inputs correct.
 
 MIT license. No package-registry release is required to run the source or install locally.
