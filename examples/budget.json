@@ -86,6 +86,93 @@
       "numerator": "1"
     },
     "weights": {
+  "a_always_above_margin": false,
+  "at_margin": {
+    "a_rate": {
+      "denominator": "3",
+      "numerator": "1"
+    },
+    "b_rate": {
+      "denominator": "3",
+      "numerator": "1"
+    },
+    "difference": {
+      "denominator": "1",
+      "numerator": "0"
+    },
+    "weights": {
+      "a": {
+        "denominator": "3",
+        "numerator": "1"
+      },
+      "b": {
+        "denominator": "3",
+        "numerator": "2"
+      }
+    }
+  },
+  "format": "mixmargin/v1",
+  "group_count": 2,
+  "groups": [
+    {
+      "a_success": 10,
+      "b_success": 0,
+      "difference": {
+        "denominator": "1",
+        "numerator": "1"
+      },
+      "group": "a",
+      "total": 10,
+      "weight_max": {
+        "denominator": "1",
+        "numerator": "1"
+      },
+      "weight_min": {
+        "denominator": "1",
+        "numerator": "0"
+      }
+    },
+    {
+      "a_success": 0,
+      "b_success": 5,
+      "difference": {
+        "denominator": "2",
+        "numerator": "-1"
+      },
+      "group": "b",
+      "total": 10,
+      "weight_max": {
+        "denominator": "1",
+        "numerator": "1"
+      },
+      "weight_min": {
+        "denominator": "1",
+        "numerator": "0"
+      }
+    }
+  ],
+  "input": {
+    "bytes": 81,
+    "sha256": "8a562531a2885e18909d16d6309ab4239837c192ee93223109155636bdc77d42"
+  },
+  "margin": {
+    "denominator": "1",
+    "numerator": "0"
+  },
+  "maximum": {
+    "a_rate": {
+      "denominator": "1",
+      "numerator": "1"
+    },
+    "b_rate": {
+      "denominator": "1",
+      "numerator": "0"
+    },
+    "difference": {
+      "denominator": "1",
+      "numerator": "1"
+    },
+    "weights": {
       "a": {
         "denominator": "1",
         "numerator": "1"
@@ -252,4 +339,4 @@
     },
     "status": "complete"
   }
-    }
+}
