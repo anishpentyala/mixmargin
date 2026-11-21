@@ -191,6 +191,56 @@ CLI exit statuses and top-level verdicts remain global. The frontier is
 not a statistical confidence band, shift forecast, or new optimization
 method. [Reasoning and validation](FRONTIER.md).
 
+## Center an analysis on a declared deployment mixture
+
+The evaluation group totals need not match a known deployment mix. Supply
+`--reference-weight GROUP=DECIMAL` once per group to add a **separate**
+`reference_analysis`. The original observed/global fields do not move.
+
+```sh
+mixmargin examples/reversal.csv --reference-weight routine=0.7 \
+  --reference-weight hard=0.3 --tv-budget 0.01 --tv-frontier
+# exit 1 still describes all box-allowed mixtures
+```
+
+The evaluation mix in this example is outside the box bounds, so its observed
+TV analyses stay unavailable. The declared 70% routine / 30% hard reference
+is allowed. Its A-minus-B difference is `1/100`; the nearest allowed tie is
+at TV distance `1/30`. Within TV budget `1/100`, its difference ranges from
+`7/1000` to `13/1000`, strictly positive. This does not change the global
+minimum `-7/50`. [Full example](examples/reference.json).
+
+The Python equivalent is:
+
+```python
+from mixmargin import audit
+
+report = audit('counts.csv', reference_weights={'routine': '0.7', 'hard': '0.3'},
+               tv_budget='0.01', tv_frontier=True)
+reference = report['reference_analysis']
+# Check reference['tv_budget']['status'] and its nested verdict, not the
+# top-level observed TV budget or the global verdict.
+```
+
+`analyze()` accepts the same keyword. Supply a built-in dict containing every
+exact group label once, with the same exact decimal syntax as box weights.
+Weights must sum **exactly** to one and lie within the declared bounds.
+Missing/extra labels, duplicate CLI labels, floats, and invalid weights are
+errors. No normalization, projection or inferred remainder is used.
+Use `None` or omit the keyword to keep the old report unchanged.
+
+`reference_analysis.reference` records the supplied weights and their rates;
+`sensitivity` gives the nearest-margin result. Its optional `tv_budget` and
+`tv_frontier` appear only when those options are requested, and use this
+reference instead of the sample mix. The top-level fields still use their
+original reference and meaning. Counts, box bounds, margin and conditional
+rates are shared. The count-file hash does not cover CLI reference arguments.
+
+Reference weights and labels are disclosed in JSON. CLI values can also
+appear in shell history or local process inspection; use the Python API when
+that matters. This is another declared scenario, not an estimated deployment
+population or a new statistical guarantee. [Contract, reasoning and cost](REFERENCE.md).
+
 ## Margin and exit status
 
 ```sh
