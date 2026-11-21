@@ -142,13 +142,71 @@ def _observed_sensitivity(rows, observed, threshold, minimum):
             'witness': _witness(rows, weights)}
 
 
-def analyze(groups, *, margin='0'):
-    """Sharp rate bounds and observed-mixture distance to loss of a margin.
+def _budget_extreme(rows, observed, budget, maximize):
+    # Move only while the objective strictly improves. Before donors and
+    # recipients cross, no coordinate can both give and receive mass, so
+    # moved mass equals TV distance, not merely a transport-plan upper bound.
+    scores = [-row[3] if maximize else row[3] for row in rows]
+    donors = sorted(range(len(rows)), key=lambda i: (-scores[i], rows[i][0].name))
+    recipients = sorted(range(len(rows)), key=lambda i: (scores[i], rows[i][0].name))
+    weights = list(observed)
+    donor = recipient = 0
+    remaining = budget
+    while remaining > 0 and donor < len(rows) and recipient < len(rows):
+        i, j = donors[donor], recipients[recipient]
+        available = weights[i] - rows[i][1]
+        capacity = rows[j][2] - weights[j]
+        if available == 0:
+            donor += 1
+            continue
+        if capacity == 0:
+            recipient += 1
+            continue
+        if scores[i] <= scores[j]:
+            break
+        amount = min(available, capacity, remaining)
+        weights[i] -= amount
+        weights[j] += amount
+        remaining -= amount
+    return weights
+
+
+def _budget_witness(rows, observed, weights):
+    distance = sum((abs(a - b) for a, b in zip(weights, observed)), Fraction(0)) / 2
+    return {**_witness(rows, weights), 'distance_used': _fraction(distance)}
+
+
+def _budget_report(rows, observed, budget, threshold):
+    if not all(row[1] <= w <= row[2] for row, w in zip(rows, observed)):
+        return {'status': 'observed_outside_bounds', 'budget': _fraction(budget),
+                'minimum': None, 'maximum': None, 'at_margin': None,
+                'possible': None, 'a_always_above_margin': None}
+    low = _budget_extreme(rows, observed, budget, False)
+    high = _budget_extreme(rows, observed, budget, True)
+    minimum = sum((row[3] * w for row, w in zip(rows, low)), Fraction(0))
+    maximum = sum((row[3] * w for row, w in zip(rows, high)), Fraction(0))
+    equality = None
+    if minimum <= threshold <= maximum:
+        alpha = Fraction(0) if minimum == maximum else (threshold - minimum) / (maximum - minimum)
+        weights = [(1 - alpha) * a + alpha * b for a, b in zip(low, high)]
+        equality = _budget_witness(rows, observed, weights)
+    return {'status': 'complete', 'budget': _fraction(budget),
+            'minimum': _budget_witness(rows, observed, low),
+            'maximum': _budget_witness(rows, observed, high), 'at_margin': equality,
+            'a_always_above_margin': minimum > threshold,
+            'possible': {'above_margin': maximum > threshold,
+                         'equal_margin': minimum <= threshold <= maximum,
+                         'below_margin': minimum < threshold}}
+
+
+def analyze(groups, *, margin='0', tv_budget=None):
+    """Sharp rate bounds, failure distance, and optional TV-budget extrema.
 
     Conditional empirical rates are held fixed. This is not statistical
     inference, a fairness audit, or validation of group definitions.
     """
     threshold = probability(margin)
+    budget = None if tv_budget is None else probability(tv_budget)
     rows = _validate(groups)
     low = _extreme(rows, False)
     high = _extreme(rows, True)
@@ -160,7 +218,7 @@ def analyze(groups, *, margin='0'):
         equality = _witness(rows, [(1 - alpha) * a + alpha * b for a, b in zip(low, high)])
     total = sum(row[0].total for row in rows)
     observed = [Fraction(row[0].total, total) for row in rows]
-    return {'format': 'mixmargin/v1',
+    report = {'format': 'mixmargin/v1',
             'scope': 'fixed empirical conditional rates under shared bounded group weights only',
             'group_count': len(rows), 'margin': _fraction(threshold),
             'a_always_above_margin': minimum > threshold,
@@ -176,9 +234,12 @@ def analyze(groups, *, margin='0'):
             'groups': [{'group': g.name, 'a_success': g.a_success, 'b_success': g.b_success,
                         'total': g.total, 'weight_min': _fraction(lo), 'weight_max': _fraction(hi),
                         'difference': _fraction(delta)} for g, lo, hi, delta in rows]}
+    if budget is not None:
+        report['tv_budget'] = _budget_report(rows, observed, budget, threshold)
+    return report
 
 
-def audit(path, *, margin='0'):
+def audit(path, *, margin='0', tv_budget=None):
     """Read one bounded regular UTF-8 CSV snapshot, validate all, then analyze."""
     fd = -1
     try:
@@ -204,7 +265,7 @@ def audit(path, *, margin='0'):
                     or any(not _COUNT.fullmatch(cell) for cell in cells[1:4])):
                 raise AuditError('invalid field or count at record ' + str(record))
             groups.append(Group(cells[0], *(int(cell) for cell in cells[1:4]), *cells[4:]))
-        result = analyze(groups, margin=margin)
+        result = analyze(groups, margin=margin, tv_budget=tv_budget)
         result['input'] = {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
         return result
     except (OSError, UnicodeError, csv.Error, OverflowError) as exc:
@@ -218,9 +279,10 @@ def _run(argv=None):
     parser = argparse.ArgumentParser(description='Exact accuracy-margin sensitivity to group mixture weights')
     parser.add_argument('csv')
     parser.add_argument('--margin', default='0', help='strict A-minus-B margin in [0,1], exact decimal')
+    parser.add_argument('--tv-budget', help='add attainable range within this TV budget of observed mix; does not change exit status')
     args = parser.parse_args(argv)
     try:
-        report = audit(args.csv, margin=args.margin)
+        report = audit(args.csv, margin=args.margin, tv_budget=args.tv_budget)
         payload = json.dumps(report, ensure_ascii=True, sort_keys=True, indent=2) + '\n'
     except (AuditError, MemoryError) as exc:
         print('mixmargin: no complete audit; ' + str(exc), file=sys.stderr)
