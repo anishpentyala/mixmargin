@@ -199,12 +199,60 @@ def _budget_report(rows, observed, budget, threshold):
                          'below_margin': minimum < threshold}}
 
 
-def analyze(groups, *, margin='0', tv_budget=None):
-    """Sharp rate bounds, failure distance, and optional TV-budget extrema.
+def _frontier_curve(rows, observed, maximize):
+    # Each strict transfer ends at a donor/recipient capacity boundary.
+    # Between boundaries the same transfer is optimal, so both the value
+    # and these feasible witness weights interpolate linearly in budget.
+    scores = [-row[3] if maximize else row[3] for row in rows]
+    donors = sorted(range(len(rows)), key=lambda i: (-scores[i], rows[i][0].name))
+    recipients = sorted(range(len(rows)), key=lambda i: (scores[i], rows[i][0].name))
+    weights = list(observed)
+    distance = Fraction(0)
+    points = [{'budget': _fraction(distance),
+               'witness': _budget_witness(rows, observed, weights)}]
+    donor = recipient = 0
+    while donor < len(rows) and recipient < len(rows):
+        i, j = donors[donor], recipients[recipient]
+        available = weights[i] - rows[i][1]
+        capacity = rows[j][2] - weights[j]
+        if available == 0:
+            donor += 1
+            continue
+        if capacity == 0:
+            recipient += 1
+            continue
+        if scores[i] <= scores[j]:
+            break
+        amount = min(available, capacity)
+        weights[i] -= amount
+        weights[j] += amount
+        distance += amount
+        points.append({'budget': _fraction(distance),
+                       'witness': _budget_witness(rows, observed, weights)})
+    # Budget is a limit, not distance that must be used. Extend the final
+    # optimum unchanged to one, even when the feasible set is a singleton.
+    if distance < 1:
+        points.append({'budget': _fraction(Fraction(1)),
+                       'witness': _budget_witness(rows, observed, weights)})
+    return points
+
+
+def _frontier_report(rows, observed):
+    if not all(row[1] <= w <= row[2] for row, w in zip(rows, observed)):
+        return {'status': 'observed_outside_bounds', 'minimum': None, 'maximum': None}
+    return {'status': 'complete',
+            'minimum': _frontier_curve(rows, observed, False),
+            'maximum': _frontier_curve(rows, observed, True)}
+
+
+def analyze(groups, *, margin='0', tv_budget=None, tv_frontier=False):
+    """Sharp rate bounds, failure distance, and optional TV-budget curves.
 
     Conditional empirical rates are held fixed. This is not statistical
     inference, a fairness audit, or validation of group definitions.
     """
+    if type(tv_frontier) is not bool:
+        raise AuditError('tv_frontier must be a boolean')
     threshold = probability(margin)
     budget = None if tv_budget is None else probability(tv_budget)
     rows = _validate(groups)
@@ -236,10 +284,12 @@ def analyze(groups, *, margin='0', tv_budget=None):
                         'difference': _fraction(delta)} for g, lo, hi, delta in rows]}
     if budget is not None:
         report['tv_budget'] = _budget_report(rows, observed, budget, threshold)
+    if tv_frontier:
+        report['tv_frontier'] = _frontier_report(rows, observed)
     return report
 
 
-def audit(path, *, margin='0', tv_budget=None):
+def audit(path, *, margin='0', tv_budget=None, tv_frontier=False):
     """Read one bounded regular UTF-8 CSV snapshot, validate all, then analyze."""
     fd = -1
     try:
@@ -265,7 +315,7 @@ def audit(path, *, margin='0', tv_budget=None):
                     or any(not _COUNT.fullmatch(cell) for cell in cells[1:4])):
                 raise AuditError('invalid field or count at record ' + str(record))
             groups.append(Group(cells[0], *(int(cell) for cell in cells[1:4]), *cells[4:]))
-        result = analyze(groups, margin=margin, tv_budget=tv_budget)
+        result = analyze(groups, margin=margin, tv_budget=tv_budget, tv_frontier=tv_frontier)
         result['input'] = {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
         return result
     except (OSError, UnicodeError, csv.Error, OverflowError) as exc:
@@ -280,9 +330,11 @@ def _run(argv=None):
     parser.add_argument('csv')
     parser.add_argument('--margin', default='0', help='strict A-minus-B margin in [0,1], exact decimal')
     parser.add_argument('--tv-budget', help='add attainable range within this TV budget of observed mix; does not change exit status')
+    parser.add_argument('--tv-frontier', action='store_true', help='add exact TV-budget curves on [0,1]; does not change exit status')
     args = parser.parse_args(argv)
     try:
-        report = audit(args.csv, margin=args.margin, tv_budget=args.tv_budget)
+        report = audit(args.csv, margin=args.margin, tv_budget=args.tv_budget,
+                       tv_frontier=args.tv_frontier)
         payload = json.dumps(report, ensure_ascii=True, sort_keys=True, indent=2) + '\n'
     except (AuditError, MemoryError) as exc:
         print('mixmargin: no complete audit; ' + str(exc), file=sys.stderr)
