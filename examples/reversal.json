@@ -145,6 +145,11 @@
     },
     "within_weight_bounds": false
   },
+  "observed_sensitivity": {
+    "distance": null,
+    "status": "observed_outside_bounds",
+    "witness": null
+  },
   "possible": {
     "above_margin": true,
     "below_margin": true,
