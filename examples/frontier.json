@@ -1,0 +1,496 @@
+{
+  "a_always_above_margin": false,
+  "at_margin": {
+    "a_rate": {
+      "denominator": "2050",
+      "numerator": "953"
+    },
+    "b_rate": {
+      "denominator": "2050",
+      "numerator": "953"
+    },
+    "difference": {
+      "denominator": "1",
+      "numerator": "0"
+    },
+    "weights": {
+      "easy": {
+        "denominator": "205",
+        "numerator": "61"
+      },
+      "hard": {
+        "denominator": "205",
+        "numerator": "79"
+      },
+      "mixed": {
+        "denominator": "41",
+        "numerator": "13"
+      }
+    }
+  },
+  "format": "mixmargin/v1",
+  "group_count": 3,
+  "groups": [
+    {
+      "a_success": 18,
+      "b_success": 2,
+      "difference": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "group": "easy",
+      "total": 20,
+      "weight_max": {
+        "denominator": "10",
+        "numerator": "7"
+      },
+      "weight_min": {
+        "denominator": "10",
+        "numerator": "1"
+      }
+    },
+    {
+      "a_success": 1,
+      "b_success": 8,
+      "difference": {
+        "denominator": "10",
+        "numerator": "-7"
+      },
+      "group": "hard",
+      "total": 10,
+      "weight_max": {
+        "denominator": "20",
+        "numerator": "11"
+      },
+      "weight_min": {
+        "denominator": "20",
+        "numerator": "1"
+      }
+    },
+    {
+      "a_success": 5,
+      "b_success": 4,
+      "difference": {
+        "denominator": "10",
+        "numerator": "1"
+      },
+      "group": "mixed",
+      "total": 10,
+      "weight_max": {
+        "denominator": "5",
+        "numerator": "3"
+      },
+      "weight_min": {
+        "denominator": "10",
+        "numerator": "1"
+      }
+    }
+  ],
+  "input": {
+    "bytes": 118,
+    "sha256": "3b601fd02fb60df4f51dacebbd99a9837af4b5e4bc385d5392e34aca0e0f3f5b"
+  },
+  "margin": {
+    "denominator": "1",
+    "numerator": "0"
+  },
+  "maximum": {
+    "a_rate": {
+      "denominator": "25",
+      "numerator": "19"
+    },
+    "b_rate": {
+      "denominator": "100",
+      "numerator": "21"
+    },
+    "difference": {
+      "denominator": "20",
+      "numerator": "11"
+    },
+    "weights": {
+      "easy": {
+        "denominator": "10",
+        "numerator": "7"
+      },
+      "hard": {
+        "denominator": "20",
+        "numerator": "1"
+      },
+      "mixed": {
+        "denominator": "4",
+        "numerator": "1"
+      }
+    }
+  },
+  "minimum": {
+    "a_rate": {
+      "denominator": "25",
+      "numerator": "8"
+    },
+    "b_rate": {
+      "denominator": "100",
+      "numerator": "59"
+    },
+    "difference": {
+      "denominator": "100",
+      "numerator": "-27"
+    },
+    "weights": {
+      "easy": {
+        "denominator": "10",
+        "numerator": "1"
+      },
+      "hard": {
+        "denominator": "20",
+        "numerator": "11"
+      },
+      "mixed": {
+        "denominator": "20",
+        "numerator": "7"
+      }
+    }
+  },
+  "observed": {
+    "a_rate": {
+      "denominator": "5",
+      "numerator": "3"
+    },
+    "b_rate": {
+      "denominator": "20",
+      "numerator": "7"
+    },
+    "difference": {
+      "denominator": "4",
+      "numerator": "1"
+    },
+    "weights": {
+      "easy": {
+        "denominator": "2",
+        "numerator": "1"
+      },
+      "hard": {
+        "denominator": "4",
+        "numerator": "1"
+      },
+      "mixed": {
+        "denominator": "4",
+        "numerator": "1"
+      }
+    },
+    "within_weight_bounds": true
+  },
+  "observed_sensitivity": {
+    "distance": {
+      "denominator": "6",
+      "numerator": "1"
+    },
+    "status": "attainable",
+    "witness": {
+      "a_rate": {
+        "denominator": "15",
+        "numerator": "7"
+      },
+      "b_rate": {
+        "denominator": "15",
+        "numerator": "7"
+      },
+      "difference": {
+        "denominator": "1",
+        "numerator": "0"
+      },
+      "weights": {
+        "easy": {
+          "denominator": "3",
+          "numerator": "1"
+        },
+        "hard": {
+          "denominator": "12",
+          "numerator": "5"
+        },
+        "mixed": {
+          "denominator": "4",
+          "numerator": "1"
+        }
+      }
+    }
+  },
+  "possible": {
+    "above_margin": true,
+    "below_margin": true,
+    "equal_margin": true
+  },
+  "scope": "fixed empirical conditional rates under shared bounded group weights only",
+  "tv_frontier": {
+    "maximum": [
+      {
+        "budget": {
+          "denominator": "1",
+          "numerator": "0"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "5",
+            "numerator": "3"
+          },
+          "b_rate": {
+            "denominator": "20",
+            "numerator": "7"
+          },
+          "difference": {
+            "denominator": "4",
+            "numerator": "1"
+          },
+          "distance_used": {
+            "denominator": "1",
+            "numerator": "0"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            "hard": {
+              "denominator": "4",
+              "numerator": "1"
+            },
+            "mixed": {
+              "denominator": "4",
+              "numerator": "1"
+            }
+          }
+        }
+      },
+      {
+        "budget": {
+          "denominator": "5",
+          "numerator": "1"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "25",
+            "numerator": "19"
+          },
+          "b_rate": {
+            "denominator": "100",
+            "numerator": "21"
+          },
+          "difference": {
+            "denominator": "20",
+            "numerator": "11"
+          },
+          "distance_used": {
+            "denominator": "5",
+            "numerator": "1"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "10",
+              "numerator": "7"
+            },
+            "hard": {
+              "denominator": "20",
+              "numerator": "1"
+            },
+            "mixed": {
+              "denominator": "4",
+              "numerator": "1"
+            }
+          }
+        }
+      },
+      {
+        "budget": {
+          "denominator": "1",
+          "numerator": "1"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "25",
+            "numerator": "19"
+          },
+          "b_rate": {
+            "denominator": "100",
+            "numerator": "21"
+          },
+          "difference": {
+            "denominator": "20",
+            "numerator": "11"
+          },
+          "distance_used": {
+            "denominator": "5",
+            "numerator": "1"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "10",
+              "numerator": "7"
+            },
+            "hard": {
+              "denominator": "20",
+              "numerator": "1"
+            },
+            "mixed": {
+              "denominator": "4",
+              "numerator": "1"
+            }
+          }
+        }
+      }
+    ],
+    "minimum": [
+      {
+        "budget": {
+          "denominator": "1",
+          "numerator": "0"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "5",
+            "numerator": "3"
+          },
+          "b_rate": {
+            "denominator": "20",
+            "numerator": "7"
+          },
+          "difference": {
+            "denominator": "4",
+            "numerator": "1"
+          },
+          "distance_used": {
+            "denominator": "1",
+            "numerator": "0"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "2",
+              "numerator": "1"
+            },
+            "hard": {
+              "denominator": "4",
+              "numerator": "1"
+            },
+            "mixed": {
+              "denominator": "4",
+              "numerator": "1"
+            }
+          }
+        }
+      },
+      {
+        "budget": {
+          "denominator": "10",
+          "numerator": "3"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "25",
+            "numerator": "9"
+          },
+          "b_rate": {
+            "denominator": "25",
+            "numerator": "14"
+          },
+          "difference": {
+            "denominator": "5",
+            "numerator": "-1"
+          },
+          "distance_used": {
+            "denominator": "10",
+            "numerator": "3"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "5",
+              "numerator": "1"
+            },
+            "hard": {
+              "denominator": "20",
+              "numerator": "11"
+            },
+            "mixed": {
+              "denominator": "4",
+              "numerator": "1"
+            }
+          }
+        }
+      },
+      {
+        "budget": {
+          "denominator": "5",
+          "numerator": "2"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "25",
+            "numerator": "8"
+          },
+          "b_rate": {
+            "denominator": "100",
+            "numerator": "59"
+          },
+          "difference": {
+            "denominator": "100",
+            "numerator": "-27"
+          },
+          "distance_used": {
+            "denominator": "5",
+            "numerator": "2"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "10",
+              "numerator": "1"
+            },
+            "hard": {
+              "denominator": "20",
+              "numerator": "11"
+            },
+            "mixed": {
+              "denominator": "20",
+              "numerator": "7"
+            }
+          }
+        }
+      },
+      {
+        "budget": {
+          "denominator": "1",
+          "numerator": "1"
+        },
+        "witness": {
+          "a_rate": {
+            "denominator": "25",
+            "numerator": "8"
+          },
+          "b_rate": {
+            "denominator": "100",
+            "numerator": "59"
+          },
+          "difference": {
+            "denominator": "100",
+            "numerator": "-27"
+          },
+          "distance_used": {
+            "denominator": "5",
+            "numerator": "2"
+          },
+          "weights": {
+            "easy": {
+              "denominator": "10",
+              "numerator": "1"
+            },
+            "hard": {
+              "denominator": "20",
+              "numerator": "11"
+            },
+            "mixed": {
+              "denominator": "20",
+              "numerator": "7"
+            }
+          }
+        }
+      }
+    ],
+    "status": "complete"
+  }
+          }
