@@ -134,6 +134,63 @@ box-allowed mixtures.** Consumers of the smaller-set guarantee must check
 option (or passing `None` in Python) omits the new field entirely and leaves
 the existing report unchanged.
 
+
+## See every shift budget at once
+
+Use `--tv-frontier`, or `analyze(..., tv_frontier=True)` /
+`audit(..., tv_frontier=True)`, to add the exact minimum and maximum
+A-minus-B difference curves for **every** total-variation budget in `[0,1]`.
+This avoids choosing a grid of budgets that might miss a capacity boundary.
+It uses the same fixed empirical rates, observed reference mix, and box
+bounds as `--tv-budget`. Both options can be used together.
+
+```sh
+mixmargin examples/frontier.csv --tv-frontier
+# exit 1 still describes all box-allowed mixtures
+```
+
+In this three-group example, the minimum curve has these points:
+
+| TV budget limit | Minimum A-minus-B difference |
+| --- | --- |
+| 0 | 1/4 |
+| 3/10 | -1/5 |
+| 2/5 | -27/100 |
+| 1 | -27/100 |
+
+Between adjacent points, interpolate **linearly in the budget**, using exact
+fractions. The minimum at budget `1/6` is zero, so the strict A-win guarantee
+holds only for budgets less than `1/6`. Equality is not a strict win. The
+maximum curve is separate and need not have the same breakpoints.
+`examples/frontier.json` contains the full report and attaining weights.
+
+The opt-in `tv_frontier` field contains `status`, `minimum`, and `maximum`.
+When `status` is `complete`, each curve is an increasing-budget list of
+`{budget, witness}` points from zero through one, inclusive. A witness has
+the same rates, weights, and `distance_used` as a `tv_budget` endpoint.
+Interpolating its weights between adjacent points gives a feasible witness
+attaining the interpolated difference at every intervening budget. Do not
+interpolate across the minimum and maximum curves, skip intermediate
+points, or use binary-float rounding to make a strict-margin decision.
+
+The list includes every transfer-capacity boundary, even when adjacent
+segments have the same slope. It is not a minimal knot representation.
+Once no strict improvement remains, a final point at budget one repeats
+the optimum: a budget is an upper limit, not a requirement to move that
+much mass. `distance_used` can therefore be less than `budget`, including
+on the final plateau. Each curve has at most `2*g + 1` points for `g`
+groups. Returning a full `g`-weight witness at each point uses O(g^2)
+rational output/work, in addition to sorting. Integer bit lengths still
+affect arithmetic cost. This option is larger than a single-budget report.
+
+If the observed mix is outside the bounds, `status` is
+`observed_outside_bounds` and both curves are `null`. No projection or
+alternative reference mix is substituted. The API flag must be a boolean;
+omitting it or passing `False` leaves the existing report unchanged.
+CLI exit statuses and top-level verdicts remain global. The frontier is
+not a statistical confidence band, shift forecast, or new optimization
+method. [Reasoning and validation](FRONTIER.md).
+
 ## Margin and exit status
 
 ```sh
@@ -165,6 +222,7 @@ The report includes:
 - `observed`: rates and weights based on observed group totals, plus `within_weight_bounds`.
 - `observed_sensitivity`: minimum total-variation distance from the allowed observed mix to loss of the strict margin, with status and an attaining witness.
 - `tv_budget`: included only when requested; restricted-set endpoints, witnesses and verdicts as described above.
+- `tv_frontier`: included only when requested; exact piecewise-linear minimum/maximum curves over all TV budgets.
 - `groups`: the validated aggregate counts, bounds, and within-group differences.
 - `input`: byte count and SHA-256 of the bytes actually read. Only the file-reading API adds this field. No path is echoed.
 
