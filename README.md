@@ -52,6 +52,41 @@ Bounds may sum to more or less than one individually, as long as the feasible se
 
 The shared `total` is deliberate: evaluating A and B on unrelated samples can confound the comparison. mixmargin cannot verify the same-example, same-label, partition, or sampling assumptions from aggregate counts. A and B's joint correctness counts are unnecessary for this deterministic difference of marginal accuracies, but would matter for paired statistical inference, which this tool does not perform.
 
+## How far is the observed mix from losing the margin?
+
+When the observed group proportions satisfy the declared bounds, the report
+also computes the smallest total-variation distance to an allowed mixture
+where A minus B is **at most** the requested margin. Total variation here is
+half the sum of absolute changes in group proportions. Moving 0.1 of the
+population from one group to another has distance 0.1, not 0.2.
+
+For example, two equally sized groups with A-minus-B differences 1 and -1/2
+have an observed advantage of 1/4. With unrestricted weights, shifting 1/6 of
+the population from the first group to the second reaches a tie. The nearest
+failing mixture has weights 1/3 and 2/3, and distance 1/6. The existing
+`at_margin` witness need not be this nearest witness.
+
+`observed_sensitivity` has `status`, `distance`, and `witness`:
+
+| Status | Distance | Witness |
+| --- | --- | --- |
+| `attainable` | Exact minimum distance to loss of the strict margin | An allowed mixture exactly at the margin |
+| `already_not_above_margin` | Zero | The observed mix, whose difference is at most the margin |
+| `no_allowed_failure` | `null`, not zero | `null`, because every allowed mixture exceeds the margin |
+| `observed_outside_bounds` | `null`, not zero | `null`, because the observed mix is not an allowed starting point |
+
+The outside-bounds check takes precedence. No projection or normalization is
+substituted for an invalid starting mix. Distances use the same exact rational
+JSON representation as rates. This additive field does not change CLI exit
+statuses, which still describe **all** allowed mixtures, not just the observed
+one. The included reversal example has its observed mix outside the bounds,
+so its distance is unavailable.
+
+This is distance between declared group proportions, not distance between
+individual examples, model predictions, or full deployment distributions. It
+is not a probability of failure, a confidence level, or an estimate of how
+likely a deployment shift is. Conditional empirical rates remain fixed.
+
 ## Margin and exit status
 
 ```sh
@@ -81,6 +116,7 @@ The report includes:
 - `at_margin`: an attainable equality witness, or `null` if no such mixture exists.
 - `possible` and `a_always_above_margin`: exact strict/equality decisions.
 - `observed`: rates and weights based on observed group totals, plus `within_weight_bounds`.
+- `observed_sensitivity`: minimum total-variation distance from the allowed observed mix to loss of the strict margin, with status and an attaining witness.
 - `groups`: the validated aggregate counts, bounds, and within-group differences.
 - `input`: byte count and SHA-256 of the bytes actually read. Only the file-reading API adds this field. No path is echoed.
 
@@ -107,6 +143,25 @@ Start each weight at its lower bound. For the minimum, allocate remaining mass i
 
 The feasible set is convex. Interpolating the two extremizing weight vectors attains every objective value between the endpoints. `at_margin` uses the exact interpolation fraction, including degenerate constant-objective cases. Bounds and objectives use `fractions.Fraction` throughout. Sorting is O(g log g) comparisons; rational arithmetic cost also depends on the integer bit lengths. This is not a constant-memory or constant-time guarantee.
 
+### Why the observed distance is minimal
+
+For a fixed amount of probability mass moved, remove it from groups with the
+largest differences first, down to their lower bounds; add it to groups with
+the smallest differences first, up to their upper bounds. An exchange with a
+less extreme donor or recipient cannot give a larger objective decrease for
+the same moved mass. Pair these capacities in that order. Each segment has
+constant decrease per unit mass, and later segments cannot have a larger
+rate than earlier ones. Stop within the first segment that reaches the
+margin, using an exact fraction of its capacity.
+
+Before the minimum objective is reached, donors have strictly larger
+differences than recipients. No group both gives and receives mass, so moved
+mass equals half the L1 change in the weight vector. Therefore no smaller
+total-variation budget can reach the margin. A failing mixture below the
+margin cannot be nearer: its segment from the observed mix crosses equality
+first, within the same convex bounds. As with the extrema, this is a standard
+bounded linear optimization argument, not an algorithmic novelty claim.
+
 ## Scope and privacy
 
 Use disjoint groups that cover the intended population and the same labeled evaluation examples for both models. Overlapping cohorts do not define a partition, so their weights cannot be treated this way. Unknown/new groups, within-group distribution changes, changes in label correctness, and uncertainty in the conditional rates are outside this model. Small samples can give exact but unreliable empirical rates. Accuracy is not necessarily the metric your application needs.
@@ -131,6 +186,6 @@ python -m unittest -v
 python -m pip wheel . --no-deps -w dist
 ```
 
-The tests include an independent exact vertex enumerator for up to six groups, deterministic randomized feasible and infeasible inputs, witness attainment, swapping/scaling/permutation checks, parser and resource-limit cases, CLI statuses, and output-device failures. There is no claim that these tests prove all possible inputs correct.
+The tests include an independent exact vertex enumerator for up to six groups, deterministic randomized feasible and infeasible inputs, witness attainment, swapping/scaling/permutation checks, parser and resource-limit cases, CLI statuses, and output-device failures. The observed-distance tests also use an independent exact oracle that enumerates vertices of each L1 sign region intersected with the margin plane, for up to five groups. There is no claim that these tests prove all possible inputs correct.
 
 MIT license. No package-registry release is required to run the source or install locally.
