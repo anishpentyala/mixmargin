@@ -102,8 +102,48 @@ def _witness(rows, weights):
             'weights': {row[0].name: _fraction(w) for row, w in zip(rows, weights)}}
 
 
+def _observed_sensitivity(rows, observed, threshold, minimum):
+    if not all(row[1] <= w <= row[2] for row, w in zip(rows, observed)):
+        return {'status': 'observed_outside_bounds', 'distance': None, 'witness': None}
+    current = sum((row[3] * w for row, w in zip(rows, observed)), Fraction(0))
+    if current <= threshold:
+        return {'status': 'already_not_above_margin', 'distance': _fraction(Fraction(0)),
+                'witness': _witness(rows, observed)}
+    if minimum > threshold:
+        return {'status': 'no_allowed_failure', 'distance': None, 'witness': None}
+
+    # A unit moved from a donor to a recipient costs one unit of total
+    # variation. Largest donor minus smallest recipient gives the most
+    # objective decrease per unit, until one of their capacities is used.
+    donors = sorted(range(len(rows)), key=lambda i: (-rows[i][3], rows[i][0].name))
+    recipients = sorted(range(len(rows)), key=lambda i: (rows[i][3], rows[i][0].name))
+    weights = list(observed)
+    donor = recipient = 0
+    distance = Fraction(0)
+    remaining = current - threshold
+    while remaining > 0:
+        i, j = donors[donor], recipients[recipient]
+        available = weights[i] - rows[i][1]
+        capacity = rows[j][2] - weights[j]
+        if available == 0:
+            donor += 1
+            continue
+        if capacity == 0:
+            recipient += 1
+            continue
+        gain = rows[i][3] - rows[j][3]
+        assert gain > 0
+        amount = min(available, capacity, remaining / gain)
+        weights[i] -= amount
+        weights[j] += amount
+        distance += amount
+        remaining -= amount * gain
+    return {'status': 'attainable', 'distance': _fraction(distance),
+            'witness': _witness(rows, weights)}
+
+
 def analyze(groups, *, margin='0'):
-    """Sharp A-minus-B rate bounds over caller-declared box-simplex weights.
+    """Sharp rate bounds and observed-mixture distance to loss of a margin.
 
     Conditional empirical rates are held fixed. This is not statistical
     inference, a fairness audit, or validation of group definitions.
@@ -129,6 +169,7 @@ def analyze(groups, *, margin='0'):
                          'below_margin': minimum < threshold},
             'minimum': _witness(rows, low), 'maximum': _witness(rows, high),
             'at_margin': equality,
+            'observed_sensitivity': _observed_sensitivity(rows, observed, threshold, minimum),
             'observed': {**_witness(rows, observed),
                          'within_weight_bounds': all(row[1] <= w <= row[2]
                                                      for row, w in zip(rows, observed))},
