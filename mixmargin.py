@@ -245,7 +245,39 @@ def _frontier_report(rows, observed):
             'maximum': _frontier_curve(rows, observed, True)}
 
 
-def analyze(groups, *, margin='0', tv_budget=None, tv_frontier=False):
+def _reference_weights(rows, supplied):
+    # Require one explicit decimal weight per validated label. Never normalize,
+    # project, infer a remainder, or borrow the evaluation sample proportions.
+    if type(supplied) is not dict or len(supplied) != len(rows):
+        raise AuditError('reference_weights must be a dict with every group exactly once')
+    if set(supplied) != {row[0].name for row in rows}:
+        raise AuditError('reference_weights must contain exactly the input group labels')
+    weights = [probability(supplied[row[0].name]) for row in rows]
+    if sum(weights) != 1:
+        raise AuditError('reference weights must sum exactly to one')
+    if not all(row[1] <= weight <= row[2] for row, weight in zip(rows, weights)):
+        raise AuditError('reference weights must satisfy the declared bounds')
+    return weights
+
+
+def _reference_arguments(arguments):
+    if arguments is None:
+        return None
+    if len(arguments) > MAX_GROUPS:
+        raise AuditError('need at most 64 reference weights')
+    result = {}
+    for argument in arguments:
+        if not isinstance(argument, str) or len(argument) > 277 or '=' not in argument:
+            raise AuditError('reference weight must be GROUP=DECIMAL')
+        label, value = argument.rsplit('=', 1)
+        if label in result:
+            raise AuditError('duplicate reference group label')
+        result[label] = value
+    return result
+
+
+def analyze(groups, *, margin='0', tv_budget=None, tv_frontier=False,
+            reference_weights=None):
     """Sharp rate bounds, failure distance, and optional TV-budget curves.
 
     Conditional empirical rates are held fixed. This is not statistical
@@ -256,6 +288,7 @@ def analyze(groups, *, margin='0', tv_budget=None, tv_frontier=False):
     threshold = probability(margin)
     budget = None if tv_budget is None else probability(tv_budget)
     rows = _validate(groups)
+    reference = None if reference_weights is None else _reference_weights(rows, reference_weights)
     low = _extreme(rows, False)
     high = _extreme(rows, True)
     minimum = sum((row[3] * w for row, w in zip(rows, low)), Fraction(0))
@@ -286,10 +319,20 @@ def analyze(groups, *, margin='0', tv_budget=None, tv_frontier=False):
         report['tv_budget'] = _budget_report(rows, observed, budget, threshold)
     if tv_frontier:
         report['tv_frontier'] = _frontier_report(rows, observed)
+    if reference is not None:
+        result = {'scope': 'declared reference group mixture, not the evaluation sample mix',
+                  'reference': _witness(rows, reference),
+                  'sensitivity': _observed_sensitivity(rows, reference, threshold, minimum)}
+        if budget is not None:
+            result['tv_budget'] = _budget_report(rows, reference, budget, threshold)
+        if tv_frontier:
+            result['tv_frontier'] = _frontier_report(rows, reference)
+        report['reference_analysis'] = result
     return report
 
 
-def audit(path, *, margin='0', tv_budget=None, tv_frontier=False):
+def audit(path, *, margin='0', tv_budget=None, tv_frontier=False,
+          reference_weights=None):
     """Read one bounded regular UTF-8 CSV snapshot, validate all, then analyze."""
     fd = -1
     try:
@@ -315,7 +358,8 @@ def audit(path, *, margin='0', tv_budget=None, tv_frontier=False):
                     or any(not _COUNT.fullmatch(cell) for cell in cells[1:4])):
                 raise AuditError('invalid field or count at record ' + str(record))
             groups.append(Group(cells[0], *(int(cell) for cell in cells[1:4]), *cells[4:]))
-        result = analyze(groups, margin=margin, tv_budget=tv_budget, tv_frontier=tv_frontier)
+        result = analyze(groups, margin=margin, tv_budget=tv_budget, tv_frontier=tv_frontier,
+                         reference_weights=reference_weights)
         result['input'] = {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
         return result
     except (OSError, UnicodeError, csv.Error, OverflowError) as exc:
@@ -331,10 +375,13 @@ def _run(argv=None):
     parser.add_argument('--margin', default='0', help='strict A-minus-B margin in [0,1], exact decimal')
     parser.add_argument('--tv-budget', help='add attainable range within this TV budget of observed mix; does not change exit status')
     parser.add_argument('--tv-frontier', action='store_true', help='add exact TV-budget curves on [0,1]; does not change exit status')
+    parser.add_argument('--reference-weight', action='append', metavar='GROUP=DECIMAL',
+                        help='add separate TV analysis around declared weights; repeat for every group')
     args = parser.parse_args(argv)
     try:
         report = audit(args.csv, margin=args.margin, tv_budget=args.tv_budget,
-                       tv_frontier=args.tv_frontier)
+                       tv_frontier=args.tv_frontier,
+                       reference_weights=_reference_arguments(args.reference_weight))
         payload = json.dumps(report, ensure_ascii=True, sort_keys=True, indent=2) + '\n'
     except (AuditError, MemoryError) as exc:
         print('mixmargin: no complete audit; ' + str(exc), file=sys.stderr)
