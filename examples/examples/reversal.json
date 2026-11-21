@@ -1,0 +1,154 @@
+{
+  "a_always_above_margin": false,
+  "at_margin": {
+    "a_rate": {
+      "denominator": "30",
+      "numerator": "19"
+    },
+    "b_rate": {
+      "denominator": "30",
+      "numerator": "19"
+    },
+    "difference": {
+      "denominator": "1",
+      "numerator": "0"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "3",
+        "numerator": "1"
+      },
+      "routine": {
+        "denominator": "3",
+        "numerator": "2"
+      }
+    }
+  },
+  "format": "mixmargin/v1",
+  "group_count": 2,
+  "groups": [
+    {
+      "a_success": 1,
+      "b_success": 3,
+      "difference": {
+        "denominator": "5",
+        "numerator": "-1"
+      },
+      "group": "hard",
+      "total": 10,
+      "weight_max": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "weight_min": {
+        "denominator": "5",
+        "numerator": "1"
+      }
+    },
+    {
+      "a_success": 90,
+      "b_success": 80,
+      "difference": {
+        "denominator": "10",
+        "numerator": "1"
+      },
+      "group": "routine",
+      "total": 100,
+      "weight_max": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "weight_min": {
+        "denominator": "5",
+        "numerator": "1"
+      }
+    }
+  ],
+  "input": {
+    "bytes": 100,
+    "sha256": "3cee0eb394d352b3727313e3e41bfc5acbfaf679628ec4ccbfd2f983dc9d8494"
+  },
+  "margin": {
+    "denominator": "1",
+    "numerator": "0"
+  },
+  "maximum": {
+    "a_rate": {
+      "denominator": "50",
+      "numerator": "37"
+    },
+    "b_rate": {
+      "denominator": "10",
+      "numerator": "7"
+    },
+    "difference": {
+      "denominator": "25",
+      "numerator": "1"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "5",
+        "numerator": "1"
+      },
+      "routine": {
+        "denominator": "5",
+        "numerator": "4"
+      }
+    }
+  },
+  "minimum": {
+    "a_rate": {
+      "denominator": "50",
+      "numerator": "13"
+    },
+    "b_rate": {
+      "denominator": "5",
+      "numerator": "2"
+    },
+    "difference": {
+      "denominator": "50",
+      "numerator": "-7"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "5",
+        "numerator": "4"
+      },
+      "routine": {
+        "denominator": "5",
+        "numerator": "1"
+      }
+    }
+  },
+  "observed": {
+    "a_rate": {
+      "denominator": "110",
+      "numerator": "91"
+    },
+    "b_rate": {
+      "denominator": "110",
+      "numerator": "83"
+    },
+    "difference": {
+      "denominator": "55",
+      "numerator": "4"
+    },
+    "weights": {
+      "hard": {
+        "denominator": "11",
+        "numerator": "1"
+      },
+      "routine": {
+        "denominator": "11",
+        "numerator": "10"
+      }
+    },
+    "within_weight_bounds": false
+  },
+  "possible": {
+    "above_margin": true,
+    "below_margin": true,
+    "equal_margin": true
+  },
+  "scope": "fixed empirical conditional rates under shared bounded group weights only"
+}
